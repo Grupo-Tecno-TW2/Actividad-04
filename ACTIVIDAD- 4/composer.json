@@ -1,0 +1,22 @@
+{
+    "name": "tw2/actividad04-lab12",
+    "description": "Laboratorio 12 de Tecnologia Web II: intercambio de datos y servicios web",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-json": "*",
+        "ext-libxml": "*",
+        "ext-soap": "*",
+        "ext-xml": "*",
+        "ext-xmlwriter": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lab12\\": "src/",
+            "Lab13\\": "src/",
+            "Apicultores\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,12 @@
+﻿{
+    "codigo": "MIE-500",
+    "nombre": "Miel natural",
+    "descripcion": "Miel pura de abeja",
+    "categoria": "Miel",
+    "precio": "45.00",
+    "stock": 25,
+    "actualizado": "2026-10-25T12:00:00-04:00"
+}
+HTTP: 200
+Tiempo total: 0.023560 segundos
+Tama├▒o recibido: 211 bytes

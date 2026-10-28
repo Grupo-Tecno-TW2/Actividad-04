@@ -1,0 +1,40 @@
+﻿HTTP/1.1 200 OK
+Host: 127.0.0.1:8000
+Date: Sun, 25 Oct 2026 21:42:01 GMT
+Connection: close
+X-Powered-By: PHP/8.2.12
+Content-Type: application/json; charset=utf-8
+
+{
+    "generado": "2026-10-25T22:42:01+01:00",
+    "total": 3,
+    "productos": [
+        {
+            "codigo": "MIE-500",
+            "nombre": "Miel natural",
+            "descripcion": "Miel pura de abeja",
+            "categoria": "Miel",
+            "precio": "45.00",
+            "stock": 25,
+            "actualizado": "2026-10-25T12:00:00-04:00"
+        },
+        {
+            "codigo": "POL-250",
+            "nombre": "Polen natural",
+            "descripcion": "Polen de abeja",
+            "categoria": "Derivados",
+            "precio": "30.00",
+            "stock": 18,
+            "actualizado": "2026-10-25T12:00:00-04:00"
+        },
+        {
+            "codigo": "PRO-100",
+            "nombre": "Propoleo",
+            "descripcion": "Polen & prop├│leo: muestra de texto XML",
+            "categoria": "Derivados",
+            "precio": "25.50",
+            "stock": 12,
+            "actualizado": "2026-10-25T12:00:00-04:00"
+        }
+    ]
+}

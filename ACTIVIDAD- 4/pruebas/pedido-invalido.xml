@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pedido>
+    <codigo>PED-002</codigo>
+    <fecha>2026-10-25</fecha>
+    <productos>
+        <producto>
+            <codigo>MIE-500</codigo>
+            <cantidad>0</cantidad>
+            <precio>45.00</precio>
+        </producto>
+    </productos>
+</pedido>

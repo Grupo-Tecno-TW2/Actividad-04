@@ -1,0 +1,15 @@
+﻿[OK] JSON valido
+Resultado: El pedido JSON es valido.
+
+[OK] JSON invalido
+Resultado: El pedido JSON contiene errores.
+Detalle: La cantidad del producto 1 debe ser un entero positivo.
+
+[OK] XML valido
+Resultado: El XML cumple con el esquema XSD.
+
+[OK] XML invalido
+Resultado: El XML no cumple con el esquema XSD.
+Detalle: Element 'cantidad': '0' is not a valid value of the atomic type 'xs:positiveInteger'.
+
+Resumen: 4/4 pruebas correctas.

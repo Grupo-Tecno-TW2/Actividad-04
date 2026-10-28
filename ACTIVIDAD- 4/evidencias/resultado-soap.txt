@@ -1,0 +1,19 @@
+﻿{
+    "servicio": "SOAP",
+    "operacion": "obtenerProducto",
+    "codigo_consultado": "MIE-500",
+    "duracion_ms": 16.99,
+    "tamano_respuesta_bytes": 510,
+    "formato_respuesta": "XML SOAP",
+    "producto": {
+        "return": {
+            "codigo": "MIE-500",
+            "nombre": "Miel natural",
+            "descripcion": "Miel pura de abeja",
+            "categoria": "Miel",
+            "precio": "45.00",
+            "stock": "25",
+            "actualizado": "2026-10-25T12:00:00-04:00"
+        }
+    }
+}

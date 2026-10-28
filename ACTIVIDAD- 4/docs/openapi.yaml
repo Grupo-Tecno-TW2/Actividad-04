@@ -1,0 +1,541 @@
+
+openapi: 3.1.0
+
+info:
+  title: API REST de Apicultores
+  version: 1.0.0
+  description: |
+    API REST para consultar y administrar productos de apicultura.
+    GET es público. POST, PUT y DELETE requieren autenticación Bearer.
+    La API permite listar, buscar, consultar, crear, actualizar y eliminar productos.
+    Los errores de validación se devuelven en formato Problem Details.
+
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Productos
+    description: Operaciones sobre productos de apicultura
+
+paths:
+  /productos:
+    get:
+      tags:
+        - Productos
+      summary: Listar productos
+      description: |
+        Devuelve una lista paginada de productos.
+        Permite filtrar por texto y categoría.
+        Este endpoint es público.
+      parameters:
+        - name: pagina
+          in: query
+          description: Número de página solicitado.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+
+        - name: por_pagina
+          in: query
+          description: Cantidad de productos por página. Máximo 100.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+
+        - name: limite
+          in: query
+          description: |
+            Alias de por_pagina por compatibilidad.
+            Si se envían ambos parámetros, deben tener el mismo valor.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+
+        - name: q
+          in: query
+          description: Texto para buscar productos.
+          required: false
+          schema:
+            type: string
+
+        - name: categoria
+          in: query
+          description: Filtra los productos por categoría.
+          required: false
+          schema:
+            type: string
+            enum:
+              - Miel
+              - Derivados
+              - Cera
+
+      responses:
+        '200':
+          description: Lista de productos obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Producto'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      pagina:
+                        type: integer
+                      limite:
+                        type: integer
+                      ultima_pagina:
+                        type: integer
+                  enlaces:
+                    type: object
+                    additionalProperties:
+                      type: string
+
+        '405':
+          $ref: '#/components/responses/Error'
+
+        '422':
+          $ref: '#/components/responses/Error'
+
+    post:
+      tags:
+        - Productos
+      summary: Crear producto
+      description: |
+        Crea un producto nuevo.
+        Requiere un token Bearer válido y un cuerpo JSON.
+        La respuesta incluye la ubicación del producto creado.
+      security:
+        - BearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoEntrada'
+            example:
+              codigo: MIEL01
+              nombre: Miel natural
+              categoria: Miel
+              precio: 35.50
+              stock: 20
+              socio_id: 1
+
+      responses:
+        '201':
+          description: Producto creado correctamente.
+          headers:
+            Location:
+              description: Ruta del producto creado.
+              schema:
+                type: string
+              example: /api/v1/productos/MIEL01
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datos:
+                    $ref: '#/components/schemas/Producto'
+
+        '400':
+          $ref: '#/components/responses/Error'
+
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+
+        '405':
+          $ref: '#/components/responses/Error'
+
+        '409':
+          $ref: '#/components/responses/Error'
+
+        '415':
+          $ref: '#/components/responses/Error'
+
+        '422':
+          $ref: '#/components/responses/Error'
+
+  /productos/sugerencias:
+    get:
+      tags:
+        - Productos
+      summary: Obtener sugerencias de productos
+      description: |
+        Devuelve sugerencias relacionadas con el término de búsqueda.
+        El término debe contener entre 2 y 80 caracteres.
+        Este endpoint es público.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Término de búsqueda.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 80
+          example: miel
+
+      responses:
+        '200':
+          description: Sugerencias obtenidas correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datos:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+
+        '405':
+          $ref: '#/components/responses/Error'
+
+        '422':
+          $ref: '#/components/responses/Error'
+
+  /productos/{codigo}:
+    parameters:
+      - name: codigo
+        in: path
+        required: true
+        description: Código del producto.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 8
+          pattern: '^[A-Za-z0-9-]+$'
+        example: MIEL01
+
+    get:
+      tags:
+        - Productos
+      summary: Consultar producto por código
+      description: |
+        Devuelve un producto por su código.
+        Incluye una cabecera ETag para solicitudes condicionales.
+        Si If-None-Match coincide con la etiqueta actual, devuelve 304.
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          description: |
+            ETag obtenido de una consulta anterior.
+            También puede utilizarse * para indicar cualquier representación existente.
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Producto encontrado.
+          headers:
+            ETag:
+              description: Etiqueta de la representación actual del producto.
+              schema:
+                type: string
+            Cache-Control:
+              description: Directiva de caché de la respuesta.
+              schema:
+                type: string
+              example: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+
+        '304':
+          description: |
+            El producto no ha cambiado con respecto al ETag enviado.
+            La respuesta no contiene cuerpo.
+
+        '404':
+          $ref: '#/components/responses/Error'
+
+        '405':
+          $ref: '#/components/responses/Error'
+
+    put:
+      tags:
+        - Productos
+      summary: Actualizar producto
+      description: |
+        Actualiza un producto existente.
+        Requiere autenticación Bearer y un cuerpo JSON.
+        El código enviado en el cuerpo debe coincidir con el código de la URL.
+        Si se omite stock, se conserva el valor actual.
+      security:
+        - BearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoActualizacion'
+            example:
+              codigo: MIEL01
+              nombre: Miel natural premium
+              categoria: Miel
+              precio: 40.00
+              socio_id: 1
+
+      responses:
+        '200':
+          description: Producto actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datos:
+                    $ref: '#/components/schemas/Producto'
+                  mensaje:
+                    type: string
+              example:
+                datos:
+                  id: 1
+                  codigo: MIEL01
+                  nombre: Miel natural premium
+                  categoria: Miel
+                  precio: "40.00"
+                  stock: 20
+                  socio_id: 1
+                  actualizado_en: null
+                mensaje: Producto actualizado correctamente.
+
+        '400':
+          $ref: '#/components/responses/Error'
+
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+
+        '404':
+          $ref: '#/components/responses/Error'
+
+        '409':
+          $ref: '#/components/responses/Error'
+
+        '415':
+          $ref: '#/components/responses/Error'
+
+        '422':
+          $ref: '#/components/responses/Error'
+
+    delete:
+      tags:
+        - Productos
+      summary: Eliminar producto
+      description: |
+        Elimina un producto existente.
+        Requiere autenticación Bearer.
+        Una eliminación exitosa no devuelve cuerpo.
+      security:
+        - BearerAuth: []
+
+      responses:
+        '204':
+          description: Producto eliminado correctamente. Sin cuerpo de respuesta.
+
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+
+        '404':
+          $ref: '#/components/responses/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+      description: Token de acceso a la API.
+
+  schemas:
+    Producto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identificador interno del producto.
+        codigo:
+          type: string
+          description: Código único del producto.
+        nombre:
+          type: string
+          description: Nombre del producto.
+        categoria:
+          type: string
+          enum:
+            - Miel
+            - Derivados
+            - Cera
+        precio:
+          type: string
+          description: Precio devuelto por la API.
+        stock:
+          type: integer
+          minimum: 0
+        socio_id:
+          type: integer
+          minimum: 1
+        actualizado_en:
+          type:
+            - string
+            - "null"
+          description: Fecha de última actualización, si está disponible.
+
+    ProductoEntrada:
+      type: object
+      required:
+        - codigo
+        - nombre
+        - categoria
+        - precio
+        - stock
+        - socio_id
+      properties:
+        codigo:
+          type: string
+          minLength: 1
+          maxLength: 8
+          pattern: '^[A-Za-z0-9-]+$'
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 80
+        categoria:
+          type: string
+          enum:
+            - Miel
+            - Derivados
+            - Cera
+        precio:
+          oneOf:
+            - type: number
+              exclusiveMinimum: 0
+              multipleOf: 0.01
+            - type: string
+              pattern: '^\d+(\.\d{1,2})?$'
+          description: Precio positivo con hasta dos decimales.
+        stock:
+          type: integer
+          minimum: 0
+        socio_id:
+          type: integer
+          minimum: 1
+
+    ProductoActualizacion:
+      type: object
+      description: |
+        Debe incluir codigo, nombre, categoria, precio y socio_id.
+        El código debe coincidir con el de la URL.
+        stock es opcional y, si se omite, se conserva el valor actual.
+      required:
+        - codigo
+        - nombre
+        - categoria
+        - precio
+        - socio_id
+      properties:
+        codigo:
+          type: string
+          minLength: 1
+          maxLength: 8
+          pattern: '^[A-Za-z0-9-]+$'
+          description: Debe coincidir con el código de la URL.
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 80
+        categoria:
+          type: string
+          enum:
+            - Miel
+            - Derivados
+            - Cera
+        precio:
+          oneOf:
+            - type: number
+              exclusiveMinimum: 0
+              multipleOf: 0.01
+            - type: string
+              pattern: '^\d+(\.\d{1,2})?$'
+          description: Precio positivo con hasta dos decimales.
+        stock:
+          type: integer
+          minimum: 0
+        socio_id:
+          type: integer
+          minimum: 1
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          example: about:blank
+        title:
+          type: string
+          example: Entidad no procesable
+        status:
+          type: integer
+          example: 422
+        detail:
+          type: string
+        errores:
+          type: object
+          additionalProperties: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        errores:
+          type: object
+          additionalProperties: true
+
+  responses:
+    NoAutorizado:
+      description: Token Bearer ausente o inválido.
+      headers:
+        WWW-Authenticate:
+          description: Esquema de autenticación requerido.
+          schema:
+            type: string
+          example: Bearer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: No autorizado.
+
+    Error:
+      description: Error al procesar la solicitud.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'

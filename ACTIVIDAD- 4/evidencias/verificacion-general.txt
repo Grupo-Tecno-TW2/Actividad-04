@@ -1,0 +1,30 @@
+﻿[OK] Extension PHP: curl
+[OK] Extension PHP: soap
+[OK] Extension PHP: dom
+[OK] Extension PHP: xmlwriter
+[OK] Archivo: public/index.php
+[OK] Archivo: public/soap.php
+[OK] Archivo: public/soap.wsdl
+[OK] Archivo: schemas/pedido.xsd
+[OK] Archivo: src/Validacion/ValidadorJson.php
+[OK] Archivo: src/Validacion/ValidadorXml.php
+[OK] Archivo: pruebas/verificar-validaciones.php
+[OK] Archivo: consumir_publico.php
+
+Comprobaciones generales: 12/12
+
+[OK] JSON valido
+Resultado: El pedido JSON es valido.
+
+[OK] JSON invalido
+Resultado: El pedido JSON contiene errores.
+Detalle: La cantidad del producto 1 debe ser un entero positivo.
+
+[OK] XML valido
+Resultado: El XML cumple con el esquema XSD.
+
+[OK] XML invalido
+Resultado: El XML no cumple con el esquema XSD.
+Detalle: Element 'cantidad': '0' is not a valid value of the atomic type 'xs:positiveInteger'.
+
+Resumen: 4/4 pruebas correctas.

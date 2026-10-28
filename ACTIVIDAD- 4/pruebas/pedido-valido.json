@@ -1,0 +1,11 @@
+{
+    "codigo": "PED-101",
+    "fecha": "2026-10-25",
+    "productos": [
+        {
+            "codigo": "MIE-500",
+            "cantidad": 2,
+            "precio": 45.00
+        }
+    ]
+}
